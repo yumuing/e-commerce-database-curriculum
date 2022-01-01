@@ -1,13 +1,13 @@
 create database ECMANAGE
 on
    (name='ECMANAGE',
-    filename='D:\ECMANAGE\ECMANAGE.mdf',
+    filename='E:\ECMANAGE\ECMANAGE.mdf',
     size=5,
     maxsize=100,
     filegrowth=5%)
 log on
    (name='ECManagelog',
-    filename='D:\ECMANAGE\ECMANAGELOG.ldf',
+    filename='E:\ECMANAGE\ECMANAGELOG.ldf',
     size=1,
     maxsize=10,
     filegrowth=10
@@ -41,14 +41,16 @@ CREATE TABLE SHIPPINGADDRESS(
 	City   varchar(20)  NOT NULL ,
 	Area   varchar(20)  NOT NULL ,
     DetailedAddress  VARCHAR(50) NOT NULL,
+	UserId  int  NOT NULL
     CONSTRAINT addressid_pk PRIMARY KEY (AddressId)
+	foreign key(UserId) references USERS(UserId)
 )
 go
-insert into SHIPPINGADDRESS values('551243','小明','广东','广州','花都','广东第二师范')
-insert into SHIPPINGADDRESS values('553490','小红','广西','南宁','桂林','山水')
-insert into SHIPPINGADDRESS values('573811','小方','江西','芜湖','起飞','111111')
-insert into SHIPPINGADDRESS values('515200','小罗','湖南','衡阳','衡南','岐山')
-insert into SHIPPINGADDRESS values('578943','小李','湖北','武汉','洪山','东湖新技术开发区')
+insert into SHIPPINGADDRESS values('551243','小明','广东','广州','花都','广东第二师范','1')
+insert into SHIPPINGADDRESS values('553490','小红','广西','南宁','桂林','山水','2')
+insert into SHIPPINGADDRESS values('573811','小方','江西','芜湖','起飞','111111','3')
+insert into SHIPPINGADDRESS values('515200','小罗','湖南','衡阳','衡南','岐山','4')
+insert into SHIPPINGADDRESS values('578943','小李','湖北','武汉','洪山','东湖新技术开发区','5')
 select *from SHIPPINGADDRESS
 --C用户信息
 use ECMANAGE
@@ -58,19 +60,15 @@ CREATE TABLE USERINFO(
 	UserStatus   varchar(20)  NOT NULL ,
 	RegistrationTime   smalldatetime  NOT NULL ,
 	PhoneNumber   varchar(11)  NOT NULL ,
-    AddressId  VARCHAR(20) NOT NULL,
-	foreign key(AddressId) references SHIPPINGADDRESS(AddressId),--依赖B表的地址编号
-	CONSTRAINT userinfo_addressid_pk PRIMARY KEY (AddressId),
 	foreign key(UserId) references USERS(UserId),
 	CONSTRAINT phonenumber_ck check (len(PhoneNumber)=11 and PhoneNumber like'[1][35678][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),--检查手机号格式
-	constraint addressid_fk foreign key (AddressId) references SHIPPINGADDRESS(AddressId) on delete cascade on update cascade--与B表地址编号级联
 )
 go
-insert into USERINFO values('1','在线','1998-01-01 23:59','13580214940','551243')
-insert into USERINFO values('2','离线','1998-01-01 23:59','16580214940','553490')
-insert into USERINFO values('3','在线','1998-01-01 23:29','13580214940','573811')--C表添加数据必须先添加A表和B表的数据，且ID必须相同
-insert into USERINFO values('4','离线','2021-04-21 3:29','13582924940','515200')
-insert into USERINFO values('5','在线','2020-02-16 5:29','13522346140','578943')
+insert into USERINFO values('1','在线','1998-01-01 23:59','13580214940')
+insert into USERINFO values('2','离线','1998-01-01 23:59','16580214940')
+insert into USERINFO values('3','在线','1998-01-01 23:29','13580214940')--C表添加数据必须先添加A表和B表的数据，且ID必须相同
+insert into USERINFO values('4','离线','2021-04-21 3:29','13582924940')
+insert into USERINFO values('5','在线','2020-02-16 5:29','13522346140')
 select *from USERINFO
 
 --k商家信息
@@ -120,7 +118,7 @@ CREATE TABLE WAREHOUSEINFO(
 	ProductID int not null UNIQUE,
 	ProductsNumber int default(0) ,
 	CompanyId int not null,
-	CONSTRAINT warehouseid_pk PRIMARY KEY (WarehouseID),
+	CONSTRAINT warehouseid_pk PRIMARY KEY (WarehouseID,ProductID),
 	foreign key(CompanyId) references Company(CompanyId),--商家ID依赖k表
 	foreign key(ProductID) references PRODUCTPROPERTIES(ProductID),--商品编号依赖D表
 	constraint productsnumber_ck check (ProductsNumber>0)--检查商品数量大于等于0
@@ -139,20 +137,20 @@ use ECMANAGE
 go
 CREATE TABLE WAREHOUSEADDRESS(  
     WarehouseAddressId   int  NOT NULL ,
+	ProductID int not null,
 	Province   varchar(20)  NOT NULL ,
 	City   varchar(20)  NOT NULL ,
 	Area   varchar(20)  NOT NULL ,
     DetailedAddress  VARCHAR(50) NOT NULL,
-	WarehouseID  int,
+	WarehouseID  int NOT NULL,
     CONSTRAINT warehouseaddressid_pk PRIMARY KEY (WarehouseAddressId),
-	foreign key(WarehouseID) references WAREHOUSEINFO(WarehouseID)
+	foreign key(WarehouseID,ProductID) references WAREHOUSEINFO(WarehouseID,ProductID)
 )
 go
-insert into WAREHOUSEADDRESS values('53333','广东','广州','花都','行政学院','2')
-insert into WAREHOUSEADDRESS values('3333','广东','揭阳','惠来','隆江镇','1')
-insert into WAREHOUSEADDRESS values('517781','贵州','贵阳','驿埔','苗海镇','3')
-insert into WAREHOUSEADDRESS values('73513','河北','保定','涞水','九龙镇','5')
-insert into WAREHOUSEADDRESS values('6421','吉林','四平','伊通','伊莱镇','4')
+insert into WAREHOUSEADDRESS values('53333','1','广东','广州','花都','行政学院','1')
+insert into WAREHOUSEADDRESS values('3333','2','广东','揭阳','惠来','隆江镇','2')
+insert into WAREHOUSEADDRESS values('517781','5','贵州','贵阳','驿埔','苗海镇','3')
+insert into WAREHOUSEADDRESS values('73513','3','河北','保定','涞水','九龙镇','4')
 select *from WAREHOUSEADDRESS
 
 --F物流
@@ -232,7 +230,7 @@ select * from ORDERSTATUS
 use ECMANAGE
 go
 CREATE TABLE RECEIVEINFO(--！！如果订单编号和用户id都重复，报错。用户id重复，订单编号不重复就是一个人买了多个东西
-	UserId  int ,
+	UserId  int not null,
 	OrderId	 int not null,
 	Consignee	char(6)	not null,
 	AddressId	varchar(20)	not null,
@@ -256,22 +254,22 @@ select * from RECEIVEINFO
 use ECMANAGE
 go
 CREATE TABLE COMPANY_WAREHOUSEINFO(
-	CompanyID  int ,
-	WarehouseID	 int,
+	CompanyID  int not null,
+	WarehouseID	 int not null,
+	ProductID int not null,
 	LeaseExpiryTime smalldatetime not null,
-    CONSTRAINT CompanyID_WarehouseID_pk PRIMARY KEY (CompanyID,WarehouseID),
+    CONSTRAINT CompanyID_WarehouseID_pk PRIMARY KEY (CompanyID,WarehouseID,ProductID),
 	foreign key(CompanyID) references COMPANY(CompanyID),--商家ID外码依赖k表
-    foreign key(WarehouseID) references WAREHOUSEINFO(WarehouseID),--仓库ID外码依赖i表
+    foreign key(WarehouseID,ProductID) references WAREHOUSEINFO(WarehouseID,ProductID),--仓库ID外码依赖i表
     constraint COMPANY_CompanyID_fk foreign key (CompanyID) references COMPANY(CompanyID) on delete cascade on update cascade,--商家ID与k表级联
-	constraint WAREHOUSEINFO_WarehouseID_fk foreign key (WarehouseID) references WAREHOUSEINFO(WarehouseID) on delete cascade on update cascade,--仓库ID与I表级联
+	constraint WAREHOUSEINFO_WarehouseID_fk foreign key (WarehouseID,ProductID) references WAREHOUSEINFO(WarehouseID,ProductID) on delete cascade on update cascade,--仓库ID与I表级联
 	constraint LeaseExpiryTime_ck check (LeaseExpiryTime>getdate())--检查时间不小于当前时间
 )
 go
-insert into COMPANY_WAREHOUSEINFO values('1','2','2027-11-02 23:59')
-insert into COMPANY_WAREHOUSEINFO values('3','3','2025-1-16 23:59')
-insert into COMPANY_WAREHOUSEINFO values('2','4','2051-11-02 23:59')
-insert into COMPANY_WAREHOUSEINFO values('5','1','2028-1-02 23:59')
-insert into COMPANY_WAREHOUSEINFO values('4','5','2029-11-02 23:59')
+insert into COMPANY_WAREHOUSEINFO values('1','1','1','2027-11-02 23:59')
+insert into COMPANY_WAREHOUSEINFO values('3','2','2','2025-1-16 23:59')
+insert into COMPANY_WAREHOUSEINFO values('2','3','5','2051-11-02 23:59')
+insert into COMPANY_WAREHOUSEINFO values('5','4','3','2028-1-02 23:59')
 select * from COMPANY_WAREHOUSEINFO
 
 --商家-商品关系表
