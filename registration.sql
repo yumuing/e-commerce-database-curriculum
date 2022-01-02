@@ -20,17 +20,18 @@ begin
 		set @ID = IDENT_CURRENT('USERS')
 		--信息已全，视图不为空
 		set @sql1 = '
-		CREATE VIEW USER'+@ID+'VIEW
-		as 
-		select distinct(A.userId),A.UserName,A.UserPassword,B.Consignee,C.PhoneNumber,B.AddressId,B.Province,B.City,B.Area,B.DetailedAddress,C.RegistrationTime
-		from USERS A,SHIPPINGADDRESS B,USERINFO C
-		where A.userId=C.UserId and B.UserId= A.userId and A.userId='+@ID
+			CREATE VIEW USER'+@ID+'VIEW
+			as 
+			select distinct(A.userId),A.UserName,A.UserPassword,B.Consignee,C.PhoneNumber,B.AddressId,B.Province,B.City,B.Area,B.DetailedAddress,C.RegistrationTime
+			from USERS A,SHIPPINGADDRESS B,USERINFO C
+			where A.userId=C.UserId and B.UserId= A.userId and A.userId='+@ID
 		--未创建订单，视图为空
-		set @sql2 = 'CREATE VIEW USER'+@ID+'ORDERVIEW
-				as
-				select E.UserId,A.UserName,E.OrderId,E.CreationTime,E.Payment,K.CompanyId,E.ProductId,E.CommodityPrice,E.Quantity,E.TotalAmount,E.ExpressNumber,F.Freight,F.DeliveryTime,F.ReceiptTime,F.LogisticsStatusCode
-				from ORDERINFORMATION E,USERS A,PRODUCTPROPERTIES D,LODISTICS F,COMPANY K
-				where E.UserId=A.userId AND E.ProductId=D.ProductId AND E.ExpressNumber=F.ExpressNumber AND E.CompanyId=K.CompanyId AND A.userId=5058'+ @ID
+		set @sql2 = '
+			CREATE VIEW USER'+@ID+'ORDERVIEW
+			as
+			select E.UserId,A.UserName,E.OrderId,E.CreationTime,E.Payment,K.CompanyId,E.ProductId,E.CommodityPrice,E.Quantity,E.TotalAmount,E.ExpressNumber,F.Freight,F.DeliveryTime,F.ReceiptTime,F.LogisticsStatusCode
+			from ORDERINFORMATION E,USERS A,PRODUCTPROPERTIES D,LODISTICS F,COMPANY K
+			where E.UserId=A.userId AND E.ProductId=D.ProductId AND E.ExpressNumber=F.ExpressNumber AND E.CompanyId=K.CompanyId AND A.userId=5058'+ @ID
 		Exec SP_ExecuteSQL @sql1
 		Exec SP_ExecuteSQL @sql2
 	end
@@ -69,11 +70,11 @@ begin
 	end
 	--未增加信息，视图为空
 	set @sql1 = '
-			CREATE VIEW MERCHANT'+@ID+'VIEW
-			as 
-			select K.CompanyId,K.CompanyName,K.CompanyDescription,I.ProductsNumber,J.WarehouseID,J.WarehouseAddressId,J.Province,J.City,J.Area,J.DetailedAddress
-			from COMPANY K,COMPANY_WAREHOUSEINFO L,WAREHOUSEINFO I,WAREHOUSEADDRESS J
-			where L.CompanyID=K.CompanyId AND L.WarehouseID=I.WarehouseID AND I.WarehouseID=J.WarehouseID AND K.CompanyId='+@ID
+		CREATE VIEW MERCHANT'+@ID+'VIEW
+		as 
+		select K.CompanyId,K.CompanyName,K.CompanyDescription,I.ProductsNumber,J.WarehouseID,J.WarehouseAddressId,J.Province,J.City,J.Area,J.DetailedAddress
+		from COMPANY K,COMPANY_WAREHOUSEINFO L,WAREHOUSEINFO I,WAREHOUSEADDRESS J
+		where L.CompanyID=K.CompanyId AND L.WarehouseID=I.WarehouseID AND I.WarehouseID=J.WarehouseID AND K.CompanyId='+@ID
 	set @sql2 = '
 		CREATE VIEW	MERCHANT'+@ID+'SHOPINGVIEW
 		as
